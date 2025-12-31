@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import DrinkForm from './components/DrinkForm';
-import HistoryList from './components/HistoryList';
-import Dashboard from './components/Dashboard';
+import DrinkForm from './DrinkForm';
+import HistoryList from './HistoryList';
+import Dashboard from './Dashboard';
 import { DrinkRecord } from './types';
 
 const App: React.FC = () => {
