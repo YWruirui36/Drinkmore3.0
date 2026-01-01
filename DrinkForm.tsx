@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SUGAR_OPTIONS, ICE_OPTIONS, COMMON_TOPPINGS, POPULAR_BRANDS, SIZE_OPTIONS } from './constants';
 import { SugarLevel, IceLevel, DrinkRecord, DrinkSize } from './types';
-import { getDrinkSuggestions } from './geminiService';
+import { getDrinkSuggestions } from './services/geminiService';
 
 interface DrinkFormProps {
   onAdd: (record: DrinkRecord) => void;
@@ -33,6 +33,7 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
   const [isBrandSelected, setIsBrandSelected] = useState(false);
   
   const itemSearchTimerRef = useRef<number | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (editingRecord) {
@@ -41,6 +42,7 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
       setPrice(editingRecord.price.toString());
       setDate(new Date(editingRecord.timestamp).toISOString().split('T')[0]);
       setSize(editingRecord.size);
+      
       const isCustomSugar = editingRecord.sugar.includes('%');
       if (isCustomSugar) {
         setSugar(SugarLevel.CUSTOM);
@@ -48,13 +50,20 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
       } else {
         setSugar(editingRecord.sugar);
       }
+      
       setIce(editingRecord.ice);
       setSelectedToppings(editingRecord.toppings);
       setMoodScore(editingRecord.moodScore);
       setNotes(editingRecord.notes || '');
       setIsBrandSelected(true);
       setIsItemSelected(true);
-      window.scrollTo({ top: document.querySelector('form')?.offsetTop ? document.querySelector('form')!.offsetTop - 100 : 0, behavior: 'smooth' });
+
+      // 自動滾動到表單
+      if (formRef.current) {
+        const yOffset = -20; 
+        const y = formRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({top: y, behavior: 'smooth'});
+      }
     }
   }, [editingRecord]);
 
@@ -127,14 +136,23 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
     const recordData: DrinkRecord = {
       id: editingRecord ? editingRecord.id : Date.now().toString(),
       timestamp: selectedDate.getTime(),
-      brand, itemName, size, sugar: finalSugar, 
+      brand, 
+      itemName, 
+      size, 
+      sugar: finalSugar, 
       customSugarPercent: sugar === SugarLevel.CUSTOM ? customSugarPercent : undefined,
-      ice, toppings: selectedToppings, moodScore, price: Number(price) || 0, 
+      ice, 
+      toppings: selectedToppings, 
+      moodScore, 
+      price: Number(price) || 0, 
       notes
     };
 
-    if (editingRecord && onUpdate) onUpdate(recordData);
-    else onAdd(recordData);
+    if (editingRecord && onUpdate) {
+      onUpdate(recordData);
+    } else {
+      onAdd(recordData);
+    }
     resetForm();
   };
 
@@ -147,7 +165,7 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
   );
 
   return (
-    <div className={`bg-white dark:bg-[#3D342E] rounded-[3rem] p-8 shadow-2xl border transition-all relative overflow-visible ${editingRecord ? 'border-[#C8A27A] ring-4 ring-[#FFF6EC] dark:ring-black/20' : 'border-[#E6D5C3] dark:border-[#4A3F35]'}`}>
+    <div ref={formRef} className={`bg-white dark:bg-[#3D342E] rounded-[3rem] p-8 shadow-2xl border transition-all relative overflow-visible ${editingRecord ? 'border-[#C8A27A] ring-4 ring-[#FFF6EC] dark:ring-black/20' : 'border-[#E6D5C3] dark:border-[#4A3F35]'}`}>
       <div className="flex flex-col items-center mb-8 pb-8 border-b border-[#F4E9DC] dark:border-[#4A3F35]">
         <span className="text-[10px] font-black text-[#A1887F] uppercase tracking-[0.3em] mb-4">今天的心情補給評分</span>
         <div className="flex gap-2">

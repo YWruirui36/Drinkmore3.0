@@ -39,6 +39,6 @@ export interface DrinkRecord {
   moodScore: number; // 1-5 hearts
   price: number;
   notes?: string;
-  // Fix: Add estimatedCalories property to resolve TS errors in components using calorie estimation
+  // Fix: Add estimatedCalories property to the DrinkRecord interface
   estimatedCalories?: number;
 }

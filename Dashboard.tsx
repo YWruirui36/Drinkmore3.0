@@ -119,6 +119,9 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
     1: '#BCAAA4'
   };
 
+  // 格式化月份為兩位數
+  const formattedMonth = (viewDate.getMonth() + 1).toString().padStart(2, '0');
+
   return (
     <div className="space-y-6">
       <div className="bg-[#F3EADF] dark:bg-[#3D342E] rounded-[2.5rem] p-8 shadow-inner border border-[#E6D5C3] dark:border-[#4A3F35] relative overflow-hidden">
@@ -181,7 +184,11 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
             <button onClick={() => { const t = new Date(); setViewDate(t); onSelectDate(t); }} className="absolute top-0 right-0 text-[9px] font-black bg-[#E07A5F] text-white px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg active:scale-95 transition-all">今日</button>
             <div className="flex justify-between items-center mb-1 pr-12">
               <button onClick={() => changeMonth(-1)} className="text-[#A1887F] p-2 hover:text-[#4A3F35] transition-colors">◀</button>
-              <div className="text-center"><h3 className="text-xl font-black text-[#4A3F35] dark:text-[#E6D5C3] tracking-tighter uppercase">{viewDate.getFullYear()} / {viewDate.getMonth() + 1}</h3></div>
+              <div className="text-center">
+                <h3 className="text-xl font-black text-[#4A3F35] dark:text-[#E6D5C3] tracking-tighter uppercase">
+                  {viewDate.getFullYear()} / {formattedMonth}
+                </h3>
+              </div>
               <button onClick={() => changeMonth(1)} className="text-[#A1887F] p-2 hover:text-[#4A3F35] transition-colors">▶</button>
             </div>
             <p className="text-[10px] font-black text-[#A1887F] text-center mb-6 uppercase tracking-[0.2em]">MONTHLY STAMPS: {monthlyTotalCups} 🧋 / ${monthlySpending}</p>
@@ -222,14 +229,14 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
           <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-[#FFF6EC] dark:bg-black/20 p-5 rounded-[2rem] border border-[#E6D5C3] dark:border-[#4A3F35]">
-                <p className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest mb-1">{viewDate.getMonth() + 1}月總杯數</p>
+                <p className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest mb-1">{formattedMonth}月總杯數</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-2xl font-black text-[#4A3F35] dark:text-[#E6D5C3]">{monthlyTotalCups}</span>
                   <span className="text-[10px] font-bold text-[#A1887F]">杯</span>
                 </div>
               </div>
               <div className="bg-[#FFF6EC] dark:bg-black/20 p-5 rounded-[2rem] border border-[#E6D5C3] dark:border-[#4A3F35]">
-                <p className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest mb-1">{viewDate.getMonth() + 1}月平均心情</p>
+                <p className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest mb-1">{formattedMonth}月平均心情</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-2xl font-black text-[#E07A5F]">{monthlyAvgMood}</span>
                   <span className="text-[10px] font-bold text-[#A1887F]">/ 5</span>
