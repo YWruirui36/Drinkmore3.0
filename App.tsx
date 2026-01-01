@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import DrinkForm from './DrinkForm';
 import HistoryList from './HistoryList';
 import Dashboard from './Dashboard';
@@ -148,6 +149,7 @@ const App: React.FC = () => {
           紀錄每一口純粹的台灣味
         </p>
       </footer>
+      <Analytics />
     </div>
   );
 };
