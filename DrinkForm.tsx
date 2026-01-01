@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SUGAR_OPTIONS, ICE_OPTIONS, COMMON_TOPPINGS, POPULAR_BRANDS, SIZE_OPTIONS } from './constants';
 import { SugarLevel, IceLevel, DrinkRecord, DrinkSize } from './types';
-import { getDrinkSuggestions } from './services/geminiService';
+import { getDrinkSuggestions } from './geminiService';
 
 interface DrinkFormProps {
   onAdd: (record: DrinkRecord) => void;
@@ -58,7 +58,6 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
       setIsBrandSelected(true);
       setIsItemSelected(true);
 
-      // 自動滾動到表單
       if (formRef.current) {
         const yOffset = -20; 
         const y = formRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -136,23 +135,14 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
     const recordData: DrinkRecord = {
       id: editingRecord ? editingRecord.id : Date.now().toString(),
       timestamp: selectedDate.getTime(),
-      brand, 
-      itemName, 
-      size, 
-      sugar: finalSugar, 
+      brand, itemName, size, sugar: finalSugar, 
       customSugarPercent: sugar === SugarLevel.CUSTOM ? customSugarPercent : undefined,
-      ice, 
-      toppings: selectedToppings, 
-      moodScore, 
-      price: Number(price) || 0, 
+      ice, toppings: selectedToppings, moodScore, price: Number(price) || 0, 
       notes
     };
 
-    if (editingRecord && onUpdate) {
-      onUpdate(recordData);
-    } else {
-      onAdd(recordData);
-    }
+    if (editingRecord && onUpdate) onUpdate(recordData);
+    else onAdd(recordData);
     resetForm();
   };
 
@@ -172,9 +162,6 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
           {[1, 2, 3, 4, 5].map((s) => (
             <HeartIcon key={s} filled={moodScore >= s} onClick={() => setMoodScore(s)} />
           ))}
-        </div>
-        <div className="mt-3 text-[10px] font-black text-[#C8A27A] uppercase tracking-widest">
-          {moodScore === 5 ? '極度療癒！' : moodScore === 4 ? '很滿意' : moodScore === 3 ? '還不錯' : moodScore === 2 ? '普通' : '不太符合期待'}
         </div>
       </div>
 
@@ -220,13 +207,13 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">SIZE / 容量</label>
-            <select value={size} onChange={e => setSize(e.target.value as DrinkSize)} className="w-full bg-yellow-50 dark:bg-yellow-900/20 px-4 py-3 rounded-2xl text-[10px] font-black text-yellow-700 dark:text-yellow-300 outline-none border border-yellow-100 dark:border-yellow-900/30 cursor-pointer">
+            <select value={size} onChange={e => setSize(e.target.value as DrinkSize)} className="w-full bg-yellow-50 dark:bg-yellow-900/20 px-4 py-3 rounded-2xl text-[10px] font-black text-yellow-700 dark:text-yellow-300 outline-none border border-yellow-100 dark:border-yellow-900/30">
               {SIZE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
           </div>
           <div className="space-y-2">
             <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">ICE / 冰塊</label>
-            <select value={ice} onChange={e => setIce(e.target.value as IceLevel)} className="w-full bg-blue-50 dark:bg-blue-900/20 px-4 py-3 rounded-2xl text-[10px] font-black text-blue-700 dark:text-blue-300 outline-none border border-blue-100 dark:border-blue-900/30 cursor-pointer">
+            <select value={ice} onChange={e => setIce(e.target.value as IceLevel)} className="w-full bg-blue-50 dark:bg-blue-900/20 px-4 py-3 rounded-2xl text-[10px] font-black text-blue-700 dark:text-blue-300 outline-none border border-blue-100 dark:border-blue-900/30">
               {ICE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
           </div>
@@ -234,16 +221,12 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
 
         <div className="space-y-2">
           <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">SUGAR / 甜度</label>
-          <select value={sugar} onChange={e => setSugar(e.target.value)} className="w-full bg-pink-50 dark:bg-pink-900/20 px-4 py-3 rounded-2xl text-[10px] font-black text-pink-700 dark:text-pink-300 outline-none border border-pink-100 dark:border-pink-900/30 cursor-pointer">
+          <select value={sugar} onChange={e => setSugar(e.target.value)} className="w-full bg-pink-50 dark:bg-pink-900/20 px-4 py-3 rounded-2xl text-[10px] font-black text-pink-700 dark:text-pink-300 outline-none border border-pink-100 dark:border-pink-900/30">
             {SUGAR_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            <option value={SugarLevel.CUSTOM}>自定義百分比 %</option>
+            <option value={SugarLevel.CUSTOM}>自定義 %</option>
           </select>
           {sugar === SugarLevel.CUSTOM && (
-            <div className="mt-4 bg-pink-50/50 dark:bg-pink-900/10 p-4 rounded-3xl space-y-3 animate-in fade-in slide-in-from-top-2">
-              <div className="flex justify-between items-center px-1">
-                 <span className="text-[9px] font-black text-pink-400 uppercase tracking-widest">精確甜度 %</span>
-                 <span className="text-xs font-black text-pink-700 dark:text-pink-300">{customSugarPercent}%</span>
-              </div>
+            <div className="mt-4 bg-pink-50/50 dark:bg-pink-900/10 p-4 rounded-3xl space-y-3">
               <input type="range" min="0" max="100" step="1" value={customSugarPercent} onChange={e => setCustomSugarPercent(parseInt(e.target.value))} className="w-full h-1.5 bg-pink-100 dark:bg-pink-900/30 rounded-lg appearance-none cursor-pointer accent-pink-500" />
             </div>
           )}
@@ -252,30 +235,22 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
         <div className="space-y-4">
           <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">TOPPINGS / 加料</label>
           <div className="flex flex-wrap gap-2">
-            {COMMON_TOPPINGS.map(topping => {
-              const isActive = selectedToppings.includes(topping);
-              return (
-                <button key={topping} type="button" onClick={() => toggleTopping(topping)} className={`px-4 py-2 rounded-2xl text-[10px] font-black transition-all ${isActive ? 'bg-[#4A3F35] text-white shadow-md' : 'bg-[#FFF6EC] dark:bg-[#2D241E] text-[#A1887F] border border-[#E6D5C3] dark:border-[#4A3F35] hover:bg-[#F4E9DC]'}`}>
-                  {topping}
-                </button>
-              );
-            })}
+            {COMMON_TOPPINGS.map(topping => (
+              <button key={topping} type="button" onClick={() => toggleTopping(topping)} className={`px-4 py-2 rounded-2xl text-[10px] font-black transition-all ${selectedToppings.includes(topping) ? 'bg-[#4A3F35] text-white' : 'bg-[#FFF6EC] dark:bg-[#2D241E] text-[#A1887F] border border-[#E6D5C3] dark:border-[#4A3F35]'}`}>
+                {topping}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="space-y-2">
-           <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">NOTES / 補充心得</label>
-           <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="味道如何？下次想改什麼？" className="w-full bg-[#FFF6EC] dark:bg-[#2D241E] px-6 py-4 rounded-3xl text-sm font-bold text-[#4A3F35] dark:text-[#E6D5C3] outline-none h-24 resize-none border border-[#E6D5C3] dark:border-[#4A3F35] focus:border-[#C8A27A]" />
+           <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">NOTES / 心得</label>
+           <textarea value={notes} onChange={e => setNotes(e.target.value)} className="w-full bg-[#FFF6EC] dark:bg-[#2D241E] px-6 py-4 rounded-3xl text-sm font-bold text-[#4A3F35] dark:text-[#E6D5C3] outline-none h-24 resize-none border border-[#E6D5C3] dark:border-[#4A3F35]" />
         </div>
 
-        <div className="flex gap-3">
-          {editingRecord && (
-            <button type="button" onClick={resetForm} className="flex-1 py-5 rounded-3xl bg-[#F4E9DC] dark:bg-[#4A3F35] text-[#8D6E63] dark:text-[#A1887F] font-black text-xs tracking-widest uppercase transition-all">取消</button>
-          )}
-          <button type="submit" className={`py-5 mt-4 rounded-3xl font-black text-xs tracking-[0.4em] uppercase shadow-2xl transition-all active:scale-[0.98] ${editingRecord ? 'flex-[2] bg-[#E07A5F] text-white' : 'w-full bg-[#C8A27A] text-white hover:bg-[#B68D64]'}`}>
-            {editingRecord ? '更新這份快樂' : '儲存這次的快樂'}
-          </button>
-        </div>
+        <button type="submit" className={`w-full py-5 mt-4 rounded-3xl font-black text-xs tracking-[0.4em] uppercase shadow-2xl transition-all ${editingRecord ? 'bg-[#E07A5F] text-white' : 'bg-[#C8A27A] text-white'}`}>
+          {editingRecord ? '更新快樂' : '儲存快樂'}
+        </button>
       </form>
     </div>
   );

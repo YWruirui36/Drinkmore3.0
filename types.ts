@@ -36,9 +36,9 @@ export interface DrinkRecord {
   customSugarPercent?: number;
   ice: IceLevel;
   toppings: string[];
-  moodScore: number; // 1-5 hearts
+  moodScore: number;
   price: number;
   notes?: string;
-  // Fix: Add estimatedCalories property to the DrinkRecord interface
+  // Added estimatedCalories property to fix TypeScript errors in components accessing this field
   estimatedCalories?: number;
 }
