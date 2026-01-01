@@ -21,19 +21,3 @@ export const getDrinkSuggestions = async (brand: string, input: string): Promise
     return [];
   }
 };
-
-export const estimateCalories = async (brand: string, itemName: string, size: string, sugar: string, toppings: string[]): Promise<number> => {
-  const prompt = `估算以下台灣飲品的熱量（kcal）：\n品牌：${brand}\n品項：${itemName}\n容量：${size}\n糖度：${sugar}\n配料：${toppings.join(', ') || '無'}\n請根據台灣營養成分標準提供一個合理的整數數值。僅返回數字本身，不需要單位或文字解釋。`;
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: { temperature: 0.1 }
-    });
-    const result = parseInt(response.text?.trim() || "0");
-    return isNaN(result) ? 0 : result;
-  } catch (error) {
-    console.error("Calorie estimation error:", error);
-    return 0;
-  }
-};

@@ -39,5 +39,6 @@ export interface DrinkRecord {
   moodScore: number; // 1-5 hearts
   price: number;
   notes?: string;
-  estimatedCalories?: number; // Added for calorie tracking
+  // Fix: Add estimatedCalories property to resolve TS errors in components using calorie estimation
+  estimatedCalories?: number;
 }

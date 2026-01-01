@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SUGAR_OPTIONS, ICE_OPTIONS, COMMON_TOPPINGS, POPULAR_BRANDS, SIZE_OPTIONS } from './constants';
 import { SugarLevel, IceLevel, DrinkRecord, DrinkSize } from './types';
-import { getDrinkSuggestions, estimateCalories } from './geminiService';
+import { getDrinkSuggestions } from './geminiService';
 
 interface DrinkFormProps {
   onAdd: (record: DrinkRecord) => void;
@@ -24,8 +24,6 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
   const [moodScore, setMoodScore] = useState(5);
   const [notes, setNotes] = useState('');
-  const [calories, setCalories] = useState<number | undefined>(undefined);
-  const [isCalculatingCalories, setIsCalculatingCalories] = useState(false);
   
   const [brandSuggestions, setBrandSuggestions] = useState<string[]>([]);
   const [itemSuggestions, setItemSuggestions] = useState<string[]>([]);
@@ -54,7 +52,6 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
       setSelectedToppings(editingRecord.toppings);
       setMoodScore(editingRecord.moodScore);
       setNotes(editingRecord.notes || '');
-      setCalories(editingRecord.estimatedCalories);
       setIsBrandSelected(true);
       setIsItemSelected(true);
       window.scrollTo({ top: document.querySelector('form')?.offsetTop ? document.querySelector('form')!.offsetTop - 100 : 0, behavior: 'smooth' });
@@ -105,15 +102,6 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
     );
   };
 
-  const handleEstimateCalories = async () => {
-    if (!brand || !itemName) return;
-    setIsCalculatingCalories(true);
-    const finalSugar = sugar === SugarLevel.CUSTOM ? `${customSugarPercent}%` : sugar;
-    const est = await estimateCalories(brand, itemName, size, finalSugar, selectedToppings);
-    setCalories(est);
-    setIsCalculatingCalories(false);
-  };
-
   const resetForm = () => {
     setBrand('');
     setIsBrandSelected(false);
@@ -124,19 +112,12 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
     setShowItemDropdown(false);
     setMoodScore(5);
     setNotes('');
-    setCalories(undefined);
     if (onCancelEdit) onCancelEdit();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!brand || !itemName) return;
-
-    let finalCalories = calories;
-    if (finalCalories === undefined) {
-      const finalSugar = sugar === SugarLevel.CUSTOM ? `${customSugarPercent}%` : sugar;
-      finalCalories = await estimateCalories(brand, itemName, size, finalSugar, selectedToppings);
-    }
 
     const selectedDate = new Date(date);
     const now = new Date();
@@ -149,8 +130,7 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
       brand, itemName, size, sugar: finalSugar, 
       customSugarPercent: sugar === SugarLevel.CUSTOM ? customSugarPercent : undefined,
       ice, toppings: selectedToppings, moodScore, price: Number(price) || 0, 
-      notes,
-      estimatedCalories: finalCalories
+      notes
     };
 
     if (editingRecord && onUpdate) onUpdate(recordData);
@@ -265,32 +245,6 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
           </div>
         </div>
 
-        <div className="p-5 bg-[#F3EADF] dark:bg-black/20 rounded-[2rem] border border-[#E6D5C3] dark:border-[#4A3F35] flex items-center justify-between">
-          <div>
-            <span className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest block mb-1">EST. CALORIES / 熱量估算</span>
-            <div className="flex items-baseline gap-1">
-              {isCalculatingCalories ? (
-                <span className="text-sm font-black text-[#C8A27A] animate-pulse">計算中...</span>
-              ) : (
-                <>
-                  <span className="text-2xl font-black text-[#4A3F35] dark:text-[#E6D5C3]">{calories || '--'}</span>
-                  <span className="text-[10px] font-bold text-[#A1887F]">kcal</span>
-                </>
-              )}
-            </div>
-          </div>
-          <button 
-            type="button" 
-            onClick={handleEstimateCalories}
-            disabled={!brand || !itemName || isCalculatingCalories}
-            className="bg-white dark:bg-[#3D342E] p-3 rounded-2xl border border-[#E6D5C3] dark:border-[#4A3F35] hover:border-[#C8A27A] transition-all disabled:opacity-50"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#C8A27A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </button>
-        </div>
-
         <div className="space-y-2">
            <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">NOTES / 補充心得</label>
            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="味道如何？下次想改什麼？" className="w-full bg-[#FFF6EC] dark:bg-[#2D241E] px-6 py-4 rounded-3xl text-sm font-bold text-[#4A3F35] dark:text-[#E6D5C3] outline-none h-24 resize-none border border-[#E6D5C3] dark:border-[#4A3F35] focus:border-[#C8A27A]" />
@@ -300,7 +254,7 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
           {editingRecord && (
             <button type="button" onClick={resetForm} className="flex-1 py-5 rounded-3xl bg-[#F4E9DC] dark:bg-[#4A3F35] text-[#8D6E63] dark:text-[#A1887F] font-black text-xs tracking-widest uppercase transition-all">取消</button>
           )}
-          <button type="submit" disabled={isCalculatingCalories} className={`py-5 mt-4 rounded-3xl font-black text-xs tracking-[0.4em] uppercase shadow-2xl transition-all active:scale-[0.98] ${editingRecord ? 'flex-[2] bg-[#E07A5F] text-white' : 'w-full bg-[#C8A27A] text-white hover:bg-[#B68D64]'}`}>
+          <button type="submit" className={`py-5 mt-4 rounded-3xl font-black text-xs tracking-[0.4em] uppercase shadow-2xl transition-all active:scale-[0.98] ${editingRecord ? 'flex-[2] bg-[#E07A5F] text-white' : 'w-full bg-[#C8A27A] text-white hover:bg-[#B68D64]'}`}>
             {editingRecord ? '更新這份快樂' : '儲存這次的快樂'}
           </button>
         </div>

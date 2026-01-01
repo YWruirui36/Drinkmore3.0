@@ -55,7 +55,12 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
     const d = new Date(r.timestamp);
     return d.getFullYear() === viewDate.getFullYear() && d.getMonth() === viewDate.getMonth();
   });
+  
   const monthlySpending = currentMonthRecords.reduce((sum, r) => sum + (r.price || 0), 0);
+  const monthlyTotalCups = currentMonthRecords.length;
+  const monthlyAvgMood = monthlyTotalCups > 0 
+    ? (currentMonthRecords.reduce((sum, r) => sum + r.moodScore, 0) / monthlyTotalCups).toFixed(1)
+    : "0.0";
 
   const spendingData = useMemo(() => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -119,7 +124,7 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
       <div className="bg-[#F3EADF] dark:bg-[#3D342E] rounded-[2.5rem] p-8 shadow-inner border border-[#E6D5C3] dark:border-[#4A3F35] relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-32 h-32 bg-[#C8A27A] opacity-10 rounded-full blur-3xl"></div>
         <div className="flex justify-between items-start mb-6">
-          <div className="z-10">
+          <div className="z-10 text-left">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-black text-[#8D6E63] dark:text-[#A1887F] uppercase tracking-[0.3em]">YEARLY REVIEW</span>
               <select 
@@ -130,7 +135,7 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
                 {availableYears.map(y => <option key={y} value={y}>{y} 年</option>)}
               </select>
             </div>
-            <h2 className="text-4xl font-black text-[#4A3F35] dark:text-[#E6D5C3] tracking-tighter">{selectedYear} 年度回顧</h2>
+            <h2 className="text-2xl font-black text-[#4A3F35] dark:text-[#E6D5C3] tracking-tighter">{selectedYear} 年度回顧</h2>
           </div>
           <div className="text-right z-10">
             <p className="text-[9px] font-black text-[#8D6E63] dark:text-[#A1887F] uppercase">年度成就獎章</p>
@@ -170,6 +175,7 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
           <button onClick={() => setActiveTab('calendar')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === 'calendar' ? 'bg-[#C8A27A] text-white shadow-sm' : 'text-[#A1887F]'}`}>Calendar</button>
           <button onClick={() => setActiveTab('analysis')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === 'analysis' ? 'bg-[#C8A27A] text-white shadow-sm' : 'text-[#A1887F]'}`}>Insights</button>
         </div>
+        
         {activeTab === 'calendar' ? (
           <div className="relative animate-in fade-in duration-500">
             <button onClick={() => { const t = new Date(); setViewDate(t); onSelectDate(t); }} className="absolute top-0 right-0 text-[9px] font-black bg-[#E07A5F] text-white px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg active:scale-95 transition-all">今日</button>
@@ -178,17 +184,35 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
               <div className="text-center"><h3 className="text-xl font-black text-[#4A3F35] dark:text-[#E6D5C3] tracking-tighter uppercase">{viewDate.getFullYear()} / {viewDate.getMonth() + 1}</h3></div>
               <button onClick={() => changeMonth(1)} className="text-[#A1887F] p-2 hover:text-[#4A3F35] transition-colors">▶</button>
             </div>
-            <p className="text-[10px] font-black text-[#A1887F] text-center mb-6 uppercase tracking-[0.2em]">MONTHLY: {currentMonthRecords.length} CUPS / ${monthlySpending}</p>
+            <p className="text-[10px] font-black text-[#A1887F] text-center mb-6 uppercase tracking-[0.2em]">MONTHLY STAMPS: {monthlyTotalCups} 🧋 / ${monthlySpending}</p>
+            
             <div className="grid grid-cols-7 gap-y-2 text-center">
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => <span key={d} className="text-[9px] font-black text-[#D7CCC8]">{d}</span>)}
               {calendarDays.map((day, idx) => {
                  const dateObj = day ? new Date(viewDate.getFullYear(), viewDate.getMonth(), day) : null;
                  const hasRecord = day && currentMonthRecords.some(r => new Date(r.timestamp).getDate() === day);
                  const selected = day && selectedDate && selectedDate.getDate() === day && selectedDate.getMonth() === viewDate.getMonth() && selectedDate.getFullYear() === viewDate.getFullYear();
+                 
                  return (
-                   <button key={idx} disabled={!day} onClick={() => day && onSelectDate(dateObj!)} className={`relative h-10 w-full flex flex-col items-center justify-center rounded-xl transition-all ${selected ? 'bg-[#C8A27A] text-white scale-110 z-10 shadow-lg' : day ? 'hover:bg-[#FFF6EC] dark:hover:bg-[#4A3F35]' : ''}`}>
-                     <span className={`text-xs font-black ${!day ? 'text-transparent' : selected ? 'text-inherit' : hasRecord ? 'text-[#4A3F35] dark:text-[#E6D5C3]' : 'text-[#D7CCC8]'}`}>{day}</span>
-                     {hasRecord && !selected && <div className="absolute bottom-1.5 w-1 h-1 bg-[#E07A5F] rounded-full"></div>}
+                   <button 
+                     key={idx} 
+                     disabled={!day} 
+                     onClick={() => day && onSelectDate(dateObj!)} 
+                     className={`relative h-12 w-full flex flex-col items-center justify-center rounded-xl transition-all ${
+                       selected ? 'bg-[#C8A27A]/20 border border-[#C8A27A] scale-110 z-10 shadow-sm' : 
+                       day ? 'hover:bg-[#FFF6EC] dark:hover:bg-[#4A3F35]' : ''
+                     }`}
+                   >
+                     {day && (
+                       <span className={`text-xs font-black ${selected ? 'text-[#4A3F35] dark:text-[#E6D5C3]' : hasRecord ? 'opacity-0' : 'text-[#D7CCC8]'}`}>
+                         {day}
+                       </span>
+                     )}
+                     {hasRecord && (
+                       <span className="absolute inset-0 flex items-center justify-center text-lg animate-in zoom-in duration-300">
+                         🧋
+                       </span>
+                     )}
                    </button>
                  );
               })}
@@ -196,6 +220,23 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
           </div>
         ) : (
           <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[#FFF6EC] dark:bg-black/20 p-5 rounded-[2rem] border border-[#E6D5C3] dark:border-[#4A3F35]">
+                <p className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest mb-1">{viewDate.getMonth() + 1}月總杯數</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-black text-[#4A3F35] dark:text-[#E6D5C3]">{monthlyTotalCups}</span>
+                  <span className="text-[10px] font-bold text-[#A1887F]">杯</span>
+                </div>
+              </div>
+              <div className="bg-[#FFF6EC] dark:bg-black/20 p-5 rounded-[2rem] border border-[#E6D5C3] dark:border-[#4A3F35]">
+                <p className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest mb-1">{viewDate.getMonth() + 1}月平均心情</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-black text-[#E07A5F]">{monthlyAvgMood}</span>
+                  <span className="text-[10px] font-bold text-[#A1887F]">/ 5</span>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-4">
               <h4 className="text-[10px] font-black text-[#A1887F] uppercase tracking-widest px-2">每月支出趨勢 ({selectedYear})</h4>
               <div className="h-[180px] w-full">
@@ -208,8 +249,9 @@ const Dashboard: React.FC<DashboardProps> = ({ records, isDarkMode, onSelectDate
                 </ResponsiveContainer>
               </div>
             </div>
+            
             <div className="space-y-4">
-              <h4 className="text-[10px] font-black text-[#A1887F] uppercase tracking-widest px-2">心情愉悅程度 ({selectedYear})</h4>
+              <h4 className="text-[10px] font-black text-[#A1887F] uppercase tracking-widest px-2">年度心情分布 ({selectedYear})</h4>
               <div className="h-[180px] w-full flex items-center">
                 <ResponsiveContainer width="60%" height="100%">
                   <PieChart><Pie data={moodData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} paddingAngle={5} dataKey="value">{moodData.map((e, i) => <Cell key={`cell-${i}`} fill={moodColors[e.score]} stroke="none" />)}</Pie><Tooltip /></PieChart>

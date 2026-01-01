@@ -57,11 +57,6 @@ const HistoryList: React.FC<HistoryListProps> = ({ records, onDelete, onEdit }) 
                 <span className="text-blue-700 dark:text-blue-300 text-[10px] font-black bg-blue-50 dark:bg-blue-900/30 px-4 py-1.5 rounded-full uppercase tracking-tighter border border-blue-100/50">
                   {record.ice}
                 </span>
-                {record.estimatedCalories && (
-                  <span className="text-[#E07A5F] text-[10px] font-black bg-[#F3EADF] dark:bg-black/20 px-4 py-1.5 rounded-full uppercase tracking-tighter border border-[#E07A5F]/20">
-                    🔥 {record.estimatedCalories} kcal
-                  </span>
-                )}
               </div>
             </div>
             

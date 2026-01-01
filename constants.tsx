@@ -9,6 +9,10 @@ export const SIZE_OPTIONS = [
 ];
 
 export const POPULAR_BRANDS = [
+  // 新增品牌 & 熱門補強
+  '大明宣德茶', '一沐日', '約翰紅茶公司', '布萊恩紅茶', '發發 Pasture', '頃刻間', 
+  '双十八華', '青花瓷', '小良絆', '發發', '頃刻間', '木衛二',
+  
   // 咖啡連鎖 & 輕食
   '星巴克 Starbucks', '路易莎咖啡 Louisa Coffee', '85度C', '咖啡那 Caffaina', '多那之 Donutes',
   'cama café', '黑沃咖啡', '湛盧咖啡',
