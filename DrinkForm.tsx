@@ -236,7 +236,7 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
           <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">TOPPINGS / 加料</label>
           <div className="flex flex-wrap gap-2">
             {COMMON_TOPPINGS.map(topping => (
-              <button key={topping} type="button" onClick={() => toggleTopping(topping)} className={`px-4 py-2 rounded-2xl text-[10px] font-black transition-all ${selectedToppings.includes(topping) ? 'bg-[#4A3F35] text-white' : 'bg-[#FFF6EC] dark:bg-[#2D241E] text-[#A1887F] border border-[#E6D5C3] dark:border-[#4A3F35]'}`}>
+              <button key={topping} type="button" onClick={() => toggleTopping(topping)} className={`px-4 py-2 rounded-2xl text-[10px] font-black transition-all ${selectedToppings.includes(topping) ? 'bg-[#4A3F35] text-white shadow-md' : 'bg-[#FFF6EC] dark:bg-[#2D241E] text-[#A1887F] border border-[#E6D5C3] dark:border-[#4A3F35]'}`}>
                 {topping}
               </button>
             ))}
@@ -244,12 +244,12 @@ const DrinkForm: React.FC<DrinkFormProps> = ({ onAdd, onUpdate, editingRecord, o
         </div>
 
         <div className="space-y-2">
-           <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">NOTES / 心得</label>
-           <textarea value={notes} onChange={e => setNotes(e.target.value)} className="w-full bg-[#FFF6EC] dark:bg-[#2D241E] px-6 py-4 rounded-3xl text-sm font-bold text-[#4A3F35] dark:text-[#E6D5C3] outline-none h-24 resize-none border border-[#E6D5C3] dark:border-[#4A3F35]" />
+           <label className="text-[9px] font-black text-[#A1887F] uppercase tracking-widest px-2">NOTES / 補充心得</label>
+           <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="味道如何？下次想改什麼？" className="w-full bg-[#FFF6EC] dark:bg-[#2D241E] px-6 py-4 rounded-3xl text-sm font-bold text-[#4A3F35] dark:text-[#E6D5C3] outline-none h-24 resize-none border border-[#E6D5C3] dark:border-[#4A3F35] focus:border-[#C8A27A]" />
         </div>
 
-        <button type="submit" className={`w-full py-5 mt-4 rounded-3xl font-black text-xs tracking-[0.4em] uppercase shadow-2xl transition-all ${editingRecord ? 'bg-[#E07A5F] text-white' : 'bg-[#C8A27A] text-white'}`}>
-          {editingRecord ? '更新快樂' : '儲存快樂'}
+        <button type="submit" className={`w-full py-5 mt-4 rounded-3xl font-black text-xs tracking-[0.4em] uppercase shadow-2xl transition-all ${editingRecord ? 'bg-[#E07A5F] text-white' : 'bg-[#C8A27A] text-white hover:bg-[#B68D64]'}`}>
+          {editingRecord ? '更新紀錄' : '儲存紀錄'}
         </button>
       </form>
     </div>

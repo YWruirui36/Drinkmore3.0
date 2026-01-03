@@ -39,6 +39,6 @@ export interface DrinkRecord {
   moodScore: number;
   price: number;
   notes?: string;
-  // Added estimatedCalories property to fix TypeScript errors in components accessing this field
+  // AI estimated calories for the drink record
   estimatedCalories?: number;
 }
